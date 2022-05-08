@@ -96,7 +96,7 @@ namespace Mini_Fat
                 }
                 while (lastIndex != -1);
                 //ls.ToArray() because function "BytesToString" take array of byte no list
-                content = "fatma`s \n team \n file";
+                content = BytesToString(ls.ToArray());
             }
         }
         public void DeleteFile()
