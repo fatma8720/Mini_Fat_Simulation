@@ -29,14 +29,13 @@ namespace Mini_Fat
         {
            
             Virtual_Disk.initialize(file_path);
-            string s = "file";
-            File_Entry o = new File_Entry("za", 0x0, 0, s.Length,s, current_directory);
-           // o.WriteFileContent();
-           // o.ReadFileContent();
-            current_directory.Directory_table.Add(o);
-            current_directory.Write_Directory();
+            //string s = "file";
+            //File_Entry o = new File_Entry("za", 0x0, 0, s.Length, s, current_directory);
+            //current_directory.Directory_table.Add(o);
+            //current_directory.Write_Directory();
             while (true)
             {
+
                 currentPath = new string(current_directory.File_name);
                 string curDir = new string(current_directory.File_name);
                 Console.Write(curDir + "\\>");
@@ -46,6 +45,9 @@ namespace Mini_Fat
                 {
                     Commands.CLS();
                 }
+
+
+
                 else if (ParseArg[0].ToUpper() == "DIR")
                 {
                     Commands.DIR();
@@ -132,7 +134,7 @@ namespace Mini_Fat
 
                 // Console.WriteLine((int)Math.Ceiling(2050 / 1024.0));
 
-                Console.ReadKey();
+               // Console.ReadKey();
             }
 
         }

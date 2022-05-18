@@ -26,88 +26,21 @@ namespace Mini_Fat
         }
         public Directory_Entry(string File_name, byte File_attribut, int First_cluster, int File_size)
         {
+            if (File_name.Length < 11)
+            {
+                for (int i = File_name.Length; i < 11; i++)
+                {
+                    File_name += " ";
+                }
+            
+            }
              this.File_size = File_size;
           //this.File_name= File_name.ToCharArray() ;
              this.File_attribut = File_attribut;
              this.First_cluster = First_cluster;
             this.File_name = File_name.ToCharArray();
-            //if (File_attribut == 0x10)
-            //{
-            //    DirNameNoExtention(File_name.ToCharArray());
-            //}
-
-            //else if (File_attribut == 0x0)
-            //{
-            //    string[] fileName = File_name.Split('.');
-            //    DirNameWithExtention(fileName[0].ToCharArray(), fileName[1].ToCharArray());
-            //}
-            //convert frist cluster passed into array of bytes
-            //  First_Cluster = Convert_byte(First_cluster);
-            // File_Size = Convert_byte(File_size);    *****************
+         
         }
-       /* public void DirNameWithExtention(char[] file_name, char[] extension)
-        {
-            int length = file_name.Length, cont = 0, len_extention = extension.Length;
-            if (length >= 7)
-            {
-                for (int i = 0; i < 7; i++)
-                {
-                    this.File_name[cont] = file_name[i];
-                    cont++;
-                }
-                this.File_name[cont] = '.';
-                cont++;
-            }
-            else if (length < 7)
-            {
-                for (int i = 0; i < 7; i++)
-                {
-                    this.File_name[cont] = file_name[i];
-                    cont++;
-                }
-                for (int i = 0; i < 7 - length; i++)
-                {
-                    this.File_name[cont] = '#';
-                    cont++;
-                }
-                this.File_name[cont] = '.';
-                cont++;
-            }
-            for (int i = 0; i < len_extention; i++)
-            {
-                this.File_name[cont] = extension[i];
-                cont++;
-            }
-            for (int i = 0; i < 3 - len_extention; i++)
-            {
-                this.File_name[cont] = '#';
-                cont++;
-            }
-        }
-        public void DirNameNoExtention(char[] file_name)
-        {
-            int length = file_name.Length, cont = 0;
-            if (length <= 11)
-            {
-                for (int i = 0; i < length; i++)
-                {
-                    this.File_name[i] = file_name[i];
-                    cont++;
-                }
-                for (int i = 0; i < File_name.Length - length; i++)
-                {
-                    this.File_name[cont] = '#';
-                    cont++;
-                }
-            }
-            else
-            {
-                for (int i = 0; i < 11; i++)
-                {
-                    this.File_name[i] = file_name[i];
-                }
-            }
-        }*/
         public byte[] Get_Bytes()
         {
             // public static string s = "asd";

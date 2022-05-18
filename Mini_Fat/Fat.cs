@@ -7,13 +7,14 @@ namespace Mini_Fat
 {
    public static class Fat
     {
-      public static int[] Fat_table = new int[1024];
+        public static int[] Fat_table;
         //Fat()
         //{
         //    Fat_table = new int[1024];
         //}
         public static void initialize()
         {
+            Fat_table = new int[1024];
             Fat_table[0] = -1;
             Fat_table[1] = -1;
             Fat_table[2] = -1;
@@ -22,12 +23,10 @@ namespace Mini_Fat
         }
         public static void Write_Fat_table()
         {
-            long offset;
-            int nextByte;
             using (FileStream fs = new FileStream(@"C:\Users\mom\source\repos\Mini_Fat\Mini_Fat\Fat_File.txt", FileMode.Open, FileAccess.Write))
             {
                 fs.Seek(1024, SeekOrigin.Begin);
-                byte[] result = new byte[Fat_table.Length * sizeof(int)];
+                byte[] result = new byte[4096];
                 Buffer.BlockCopy(Fat_table, 0, result, 0, result.Length);
                 for (int i = 0; i < result.Length; i++)
                 {
@@ -39,24 +38,20 @@ namespace Mini_Fat
         }
         public static int[] Get_Fat_table()
         {
-            long offset;
-            int nextByte;
-            byte[] result = new byte[Fat_table.Length * sizeof(int)];
-            int[] int_result = new int[1024];
+            Fat.initialize();
+            byte[] result = new byte[4096];
+           // int[] int_result = new int[1024];
             using (FileStream fs = new FileStream(@"C:\Users\mom\source\repos\Mini_Fat\Mini_Fat\Fat_File.txt", FileMode.Open, FileAccess.Read))
             {
                 fs.Seek(1024, SeekOrigin.Begin);
-                for (int i = 0; i < result.Length; i++)
-                {
-                    // Using Read() method
-                    result[i] = (byte)fs.ReadByte();
-                }
+                fs.Read(result, 0, result.Length);
+
                 fs.Close();
                 //int_result = Array.ConvertAll(result, Convert.ToInt32);
                 Buffer.BlockCopy(result, 0, Fat_table, 0, result.Length);
                 return Fat_table;
             }
-            return int_result;
+            //return int_result;
 
         }
         public static void print_Fat_table()
@@ -82,14 +77,8 @@ namespace Mini_Fat
             return -1;
         }
         public static int Get_Next(int index) {
-            if (index >= 0&& index<1024)
-            {
+           
                 return Fat_table[index];
-            }
-            else
-            {
-                return -1;
-            }
         }
         public static void Set_Next(int index,int value)
         {

@@ -83,14 +83,39 @@ namespace Mini_Fat
 
             if (Program.current_directory.Search_Directory(name) == -1)
             {
-                Directory_Entry d = new Directory_Entry(name, 0x10, 0, 0);
-                Program.current_directory.Directory_table.Add(d);
-                Program.current_directory.Write_Directory();
-
-                if (Program.current_directory.parent != null)
+                if ((name.ToUpper()).Contains("TXT"))
                 {
-                    Program.current_directory.parent.update_content(Program.current_directory.Get_Directory_Entry());
-                    Program.current_directory.parent.Write_Directory();
+                    string s = "fatma we are here";
+                    if (name.Length < 11)
+                    {
+                        for (int i = name.Length; i < 11; i++)
+                        {
+                           name += " ";
+                        }
+
+                    }
+                    File_Entry o = new File_Entry(name, 0x0, 0, s.Length, s, Program.current_directory);
+                    o.WriteFileContent();
+                    Program.current_directory.Directory_table.Add(o);
+                    Program.current_directory.Write_Directory();
+                    if (Program.current_directory.parent != null)
+                    {
+                        Program.current_directory.parent.update_content(Program.current_directory.Get_Directory_Entry());
+                        Program.current_directory.parent.Write_Directory();
+                    }
+
+                }
+                else
+                {
+                    Directory_Entry d = new Directory_Entry(name, 0x10, 0, 0);
+                    Program.current_directory.Directory_table.Add(d);
+                    Program.current_directory.Write_Directory();
+
+                    if (Program.current_directory.parent != null)
+                    {
+                        Program.current_directory.parent.update_content(Program.current_directory.Get_Directory_Entry());
+                        Program.current_directory.parent.Write_Directory();
+                    }
                 }
             }
             else
@@ -100,13 +125,20 @@ namespace Mini_Fat
         }
         public static void RD(string name)
         {
-           
-           int index=Program.current_directory.Search_Directory(name);
+            if (name.Length < 11)
+            {
+                for (int i = name.Length; i < 11; i++)
+                {
+                    name += " ";
+                }
+
+            }
+            int index=Program.current_directory.Search_Directory(name);
 
             if (index != -1)
             {
                 int fc = Program.current_directory.Directory_table[index].First_cluster;
-                Directory d = new Directory(name.ToCharArray(), 0x10, fc, Program.current_directory.parent,0);
+                Directory d = new Directory(name.ToCharArray(), 0x10, fc, Program.current_directory,0);
                 d.delete_directory();
                 Program.current_directory.Write_Directory();
             }
@@ -247,10 +279,20 @@ namespace Mini_Fat
                 if (b==-1)
                 {
                     Directory_Entry o = Program.current_directory.Directory_table[index];
+                    if (new_name.Length < 11)
+                    {
+                        for (int i = new_name.Length; i < 11; i++)
+                        {
+                            new_name += " ";
+                        }
+
+                    }
                     o.File_name = new_name.ToCharArray();
+
                     Program.current_directory.Directory_table.RemoveAt(index);
                     Program.current_directory.Directory_table.Insert(index,o);
                     Program.current_directory.Write_Directory();
+                    Program.current_directory.Read_Directory();
                 }
                 else
                 {
@@ -264,6 +306,14 @@ namespace Mini_Fat
         }
         public static void DEL(string file_name)
         {
+            if (file_name.Length < 11)
+            {
+                for (int i = file_name.Length; i < 11; i++)
+                {
+                    file_name += " ";
+                }
+
+            }
             int index = Program.current_directory.Search_Directory(file_name);
             if (index != -1)
             {
@@ -271,8 +321,10 @@ namespace Mini_Fat
                 {
                     int fc = Program.current_directory.Directory_table[index].First_cluster;
                     int size = Program.current_directory.Directory_table[index].File_size;
-                    File_Entry o = new File_Entry(file_name,0X0,fc,size,null,Program.current_directory);
+                    File_Entry o = new File_Entry(file_name,0X0,fc,size," ",Program.current_directory);
+                    o.WriteFileContent();
                     o.DeleteFile();
+                    Program.current_directory.Write_Directory();
                 }
                 else
                 {

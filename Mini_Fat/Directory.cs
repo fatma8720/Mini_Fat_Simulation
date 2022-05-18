@@ -23,18 +23,6 @@ namespace Mini_Fat
                 this.parent = parent;
             }
         }
-        public static byte[] Convert_string_Bytes(string str)
-        {
-            byte[] bytes = new byte[str.Length * sizeof(char)];
-            System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
-            return bytes;
-        }
-        public static string  Convert_Byte_string(byte[] bytes)
-        {
-            char[] chars = new char[bytes.Length / sizeof(char)];
-            System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
-            return new string(chars);
-        }
         public static List<byte[]> SplitBytes(byte[] bytes)
         {
             List<byte[]> big_divided_list = new List<byte[]>();
@@ -110,12 +98,13 @@ namespace Mini_Fat
                 int start = Number_of_fulllsize_blocks * 1024;
                 for (int i = start; i < (start + Remainder); i++)
                     b[i%1024] = Directory_table_bytes[i];
+                ls.Add(b);
             }
 
             //check number of free blocks and if it enought or not
             if (Number_of_required_blocks <= Fat.Get_available_Blocks())
             {
-                for (int i = 0; i < Number_of_fulllsize_blocks; i++)
+                for (int i = 0; i < ls.Count; i++)
                 {
                     if (Fat_index != -1)
                     {
@@ -136,71 +125,68 @@ namespace Mini_Fat
             {
                 this.parent.Write_Directory();
             }
-            //  Remainder = Fat_index;
-            //Fat_index = Fat.Get_available_Block();
-            //Virtual_Disk.Write_Block(ls[fu], Fat_index);
-            //Fat.Set_Next(Fat_index, -1);
+            if (First_cluster != 0)
+            {
+                if (Directory_table.Count == 0)
+                {
+                    Fat.Set_Next(First_cluster, 0);
+                    First_cluster = 0;
+                
+                
+                }
+            
+            }
             Fat.Write_Fat_table();
         }
-        public void Read_Directory() ///////// change in directory table list in the top of the code or not ---- code 1 or 2 ... next or fatindex equals -1 ??? ************
+        public void Read_Directory() 
         {
-            //List<Directory_Entry> Directory_Entry_list = new List<Directory_Entry>();
+            Directory_table = new List<Directory_Entry>();
             int Fat_index=0, next = 0;
-            if (First_cluster != 0)
+            if (First_cluster != 0 && Fat.Get_Next(First_cluster) != 0)
             {
                 Fat_index = First_cluster;
                 next = Fat.Get_Next(Fat_index);
-            }
-            List<byte> B = new List<byte>();
-            while (Fat_index.Equals(-1)){
-                B.AddRange(Virtual_Disk.Get_Block(Fat_index));
-                Fat_index = next;
-                if (Fat_index != -1)
+
+                List<byte> B = new List<byte>();
+                do
                 {
-                    next = Fat.Get_Next(Fat_index);
+                    B.AddRange(Virtual_Disk.Get_Block(Fat_index));
+                    Fat_index = next;
+                    if (Fat_index != -1)
+                    {
+                        next = Fat.Get_Next(Fat_index);
+                    }
+                } while (next != -1);
+                byte[] b = new byte[32];
+                for (int i = 0; i < B.Count; i++)
+                {
+
+                    b[i % 32] = B[i];
+                    if ((i + 1) % 32 == 0)
+                    {
+                        Directory_Entry d = Get_Directory_Entry(b);
+                        if (d.File_name[0] != '\0')
+
+                            Directory_table.Add(d);
+                    }
                 }
             }
-
-            //List<byte[]> ls = new List<byte[]>();
-            //ls = SplitBytes(B.ToArray());
-            //for (int I = 0; I < ls.Count / 2; I++)
-            //{
-            //    Directory_table.Add(Get_Directory_Entry(ls[I]));
-            //}
-
-            //if (this.First_cluster != 0)
-            //{
-            //    Directory_table = new List<Directory_Entry>();
-            //    int fatIndex = this.First_cluster;
-            //    int lastIndex = Fat.Get_Next(fatIndex);
-            //    List<byte> ls = new List<byte>();
-            //    do
-            //    {
-            //        ls.AddRange(Virtual_Disk.Get_Block(fatIndex));
-            //        fatIndex = lastIndex;
-            //        if (fatIndex != -1)
-            //            lastIndex = Fat.Get_Next(fatIndex);
-            //    }
-            //    while (lastIndex!=-1);
-            //    for (int i = 0; i < ls.Count; i++)
-            //    {
-            //        byte[] b = new byte[32];
-            //        for (int k = i * 32, m = 0; m < b.Length && k < ls.Count; m++, k++)
-            //        {
-            //            b[m] = ls[k];
-            //        }
-            //        if (b[0] == 0)
-            //            break;
-            //        Directory_table.Add(Get_Directory_Entry(b));
-            //    }
-            //}
+        
         }
         public int Search_Directory(string filename)
         {
-            Read_Directory(); 
+            Read_Directory();
+            if (filename.Length < 11)
+            {
+                for (int i = filename.Length; i < 11; i++)
+                    filename += " ";
+            
+            
+            }
             for (int i = 0; i < Directory_table.Count; i++)
             {
-                if (new string(Directory_table[i].File_name) == filename)
+                string ss = new string(Directory_table[i].File_name);
+                if (ss == filename)
                 {
                     return i;
                 }
@@ -235,12 +221,13 @@ namespace Mini_Fat
                 }
                 while (index != -1);
             }
-
+          
             //check if it is parent
             if (parent != null)
             {
                 parent.Read_Directory();
-                int index_parnet = parent.Search_Directory(new string(this.File_name));
+                string ss = new string(File_name);
+                int index_parnet = parent.Search_Directory(ss);
                 if (index_parnet != -1)
                 {
                     parent.Directory_table.RemoveAt(index_parnet);
@@ -248,40 +235,7 @@ namespace Mini_Fat
                     Fat.Write_Fat_table();
                 }
             }
-            //    if (this.First_cluster != 0)
-            //    {
-            //        int cluster = this.First_cluster;
-            //        int next = Fat.Get_Next(cluster);
-            //        do
-            //        {
-            //            Fat.Set_Next(cluster, 0);
-            //            cluster = next;
-            //            if (cluster != -1)
-            //                next = Fat.Get_Next(cluster);
-            //        }
-            //        while (cluster != -1);
-            //    }
-            //    if (this.parent != null)
-            //    {
-            //        int index = this.parent.Search_Directory(new string(this.File_name));
-            //        if (index != -1)
-            //        {
-            //            this.parent.Directory_table.RemoveAt(index);
-            //            this.parent.Write_Directory();
-
-            //        }
-            //    }
-            //    if (Program.current_directory == this)
-            //    {
-            //        if (this.parent != null)
-            //        {
-            //            Program.current_directory = this.parent;
-            //            Program.currentPath = Program.currentPath.Substring(0, Program.currentPath.LastIndexOf('\\'));
-            //            Program.current_directory.Read_Directory();
-            //        }
-            //    }
-            //    Fat.Write_Fat_table();
-            //}
+  
         }
 
     }

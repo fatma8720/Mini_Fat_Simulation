@@ -13,10 +13,30 @@ namespace Mini_Fat
            
             if (!File.Exists(@"C:\Users\mom\source\repos\Mini_Fat\Mini_Fat\Fat_File.txt"))
             {
+                FileStream file = new FileStream(@"C:\Users\mom\source\repos\Mini_Fat\Mini_Fat\Fat_File.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+ 
+                for (int i = 0; i < 1024 * 1024; i++)
+                {
+                    if (i < 1024)
+                    {
+                        // Using write() method
+                        file.WriteByte(0);
+                    }
+                    if (i >= 1024 && i < 5120)
+                    {
+                        file.WriteByte((byte)'*');
+                    }
+                    if (i >= 5120)
+                    {
+                        file.WriteByte((byte)'#');
+                    }
+                }
+                // Closing the file
+                file.Close();
                 Fat.initialize();
                 Directory root = new Directory("H: ".ToCharArray(), 0x10, 5, null,0);
                 root.Write_Directory();
-             /****/ Fat.Set_Next(5, -1);
+             /****//// Fat.Set_Next(5, -1);
                 Program.current_directory = root;
                 Fat.Write_Fat_table();
                 //Fat.initialize();
@@ -39,27 +59,9 @@ namespace Mini_Fat
                 //root.Read_Directory();
             }
             // FileStream instance
-            FileStream file;
-            file = new FileStream(path,FileMode.Create, FileAccess.Write);
+          
             // initializing values
-            for (int i = 0; i < 1024 * 1024; i++)
-            {
-                if (i < 1024)
-                {
-                    // Using write() method
-                    file.WriteByte(0);
-                }
-                if (i >= 1024 && i < 5120)
-                {
-                    file.WriteByte((byte)'*');
-                }
-                if (i >= 5120)
-                {
-                    file.WriteByte((byte)'#');
-                }
-            }
-            // Closing the file
-            file.Close();
+           
         }
         public static void Write_Block(byte[] arr, int index)
         {
@@ -74,6 +76,7 @@ namespace Mini_Fat
                 fs.Close(); 
             }
         }
+
         public static byte[] Get_Block(int index)
         {
             byte[] result = new byte[1024];
