@@ -13,6 +13,7 @@ namespace Mini_Fat
 
         public Directory(char[] File_name, byte File_attribut, int First_cluster, Directory parent, int File_size) :base(new string (File_name), File_attribut, First_cluster,File_size)
         {
+
             this.File_name = File_name;
             this.File_attribut = File_attribut;
             this.First_cluster = First_cluster; // cause exception error in fat index in get next
