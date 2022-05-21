@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 
 
+
 namespace Mini_Fat
 {
    public static class Commands
@@ -271,14 +272,38 @@ namespace Mini_Fat
                         File_Entry o = new File_Entry(name, 0x0, fc, size, content, Program.current_directory);
                         o.WriteFileContent();
                     }
-                  // size = (content.LastIndexOf("  "));
+                    // size = (content.LastIndexOf("  "));
                     Directory_Entry d = new Directory_Entry(name, 0x0, fc, size);
                     Program.current_directory.Directory_table.Add(d);
                     Program.current_directory.Write_Directory();
                 }
                 else
                 {
-                    Console.WriteLine("this file already exsit.");
+                    Console.WriteLine("can`t copy the file in same destination.");
+                    Console.Write($"Are you sure that you want override the exist file {name.Trim(new char[] { '\0', ' ' })} , please enter Y for yes or N for no:");
+                    string s = Console.ReadLine().ToLower();
+                    if (s.Equals("y"))
+                    {
+                        
+                        string name_copy = name.Replace(".txt","cp.txt");
+                        int fc;
+                        if (size > 0)
+                        {
+                            fc = Fat.Get_available_Block();
+                            File_Entry o = new File_Entry(name_copy , 0x0, fc, size, content, Program.current_directory);
+                            o.WriteFileContent();
+                        }
+                        else
+                        {
+                            fc = 0;
+                            File_Entry o = new File_Entry(name_copy , 0x0, fc, size, content, Program.current_directory);
+                            o.WriteFileContent();
+                        }
+                        // size = (content.LastIndexOf("  "));
+                        Directory_Entry d = new Directory_Entry(name_copy, 0x0, fc, size);
+                        Program.current_directory.Directory_table.Add(d);
+                        Program.current_directory.Write_Directory();
+                    }
                 }
             }
             else
@@ -371,7 +396,6 @@ namespace Mini_Fat
             int index = Program.current_directory.Search_Directory(source);
             if (index != -1)
             {
-                EXPORT(source, "C:\\Users\\mom\\source\\repos\\Mini_Fat\\Mini_Fat");
                 int name_start = destination.LastIndexOf("\\");
                 string name;
                 name = destination.Substring(name_start + 1);
@@ -386,9 +410,8 @@ namespace Mini_Fat
                 int indexdest = Program.current_directory.Search_Directory(name);
                 if (indexdest != -1)
                 {
-                    if (destination != new string(Program.current_directory.File_name.ToArray()))
-                    {
-                        Directory n = Program.current_directory;
+                       Directory n = Program.current_directory;
+                        EXPORT(source, "C:\\Users\\mom\\source\\repos\\Mini_Fat\\Mini_Fat");
                         CD(name);
                         IMPORT("C:\\Users\\mom\\source\\repos\\Mini_Fat\\Mini_Fat\\" + source);
                         Program.current_directory.Write_Directory();
@@ -397,13 +420,8 @@ namespace Mini_Fat
                             Program.current_directory.parent.update_content(Program.current_directory.Get_Directory_Entry());
                             Program.current_directory.parent.Write_Directory();
                         }
-                        Program.current_directory=n;
-                        Program.currentPath= new string(Program.current_directory.File_name);
-                    }
-                    else
-                    {
-                        Console.WriteLine("can`t copy the file in same destination.");
-                    }
+                        Program.current_directory = n;
+                        Program.currentPath = new string(Program.current_directory.File_name);
                 }
                 else
                 {
@@ -415,5 +433,85 @@ namespace Mini_Fat
                 Console.WriteLine("system can`t find the path specified source.");
             }
         }
+        /*  public static void COPY(string source, string destination)
+        {
+            int index = Program.current_directory.Search_Directory(source);
+            if (index != -1)
+            {
+                int name_start = destination.LastIndexOf("\\");
+                string name;
+                name = destination.Substring(name_start + 1);
+                if (name.Length < 11)
+                {
+                    for (int i = name.Length; i < 11; i++)
+                    {
+                        name += " ";
+                    }
+
+                }
+
+
+                int indexdest = Program.current_directory.Search_Directory(name);
+                if (indexdest !=-1)
+                {
+                    if (destination != Program.currentPath)
+                    {
+                        //Console.WriteLine("if you want to override the exist file , write <Y> , if not write <N>");
+                      //  string b = Console.ReadLine();
+                        int fc = Program.current_directory.Directory_table[index].First_cluster;
+                        int size = Program.current_directory.Directory_table[index].File_size;
+                        //byte attr = Program.current_directory.Directory_table[index].File_attribut;
+                        int fcd = Program.current_directory.Directory_table[indexdest].First_cluster;
+                        //byte attrd = Program.current_directory.Directory_table[indexdest].File_attribut;
+
+                        //if (b.ToUpper() == "Y")
+                        //{
+                        if (source.Length < 11)
+                        {
+                            for (int i = source.Length; i < 11; i++)
+                            {
+                                source += " ";
+                            }
+
+                        }
+                            Directory_Entry de = new Directory_Entry(source, 0x0, fc, size);
+                            Directory d = new Directory(name.ToCharArray(), 0x10, fcd, Program.current_directory, 0);
+                            d.Directory_table.Add(de);
+                            d.Write_Directory();
+                            Program.current_directory.Write_Directory();
+                        if (Program.current_directory.parent != null)
+                        {
+                            Program.current_directory.parent.update_content(Program.current_directory.Get_Directory_Entry());
+                            Program.current_directory.parent.Write_Directory();
+                        }
+                        //}
+                        //else if (b.ToUpper() == "N")
+                        //{
+
+                        //    Directory_Entry de = new Directory_Entry(source+"1", 0x0, fc, size);
+                        //    Directory d = new Directory(name.ToCharArray(), 0x10, fcd, Program.current_directory, 0);
+                        //    d.Directory_table.Add(de);
+                        //    d.Write_Directory();
+                        //}
+                        //else
+                        //{
+                        //    Console.WriteLine("option doesn`t exist");
+                        //}
+                    }
+                    else
+                    {
+                        Console.WriteLine("can`t copy the file in same destination.");
+                    }
+                                   }
+                else
+                {
+                    Console.WriteLine("system can`t find the path specified.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("system can`t find the path specified source.");
+            }
+        }*/
     }
 }
