@@ -76,7 +76,6 @@ namespace Mini_Fat
                 fs.Close(); 
             }
         }
-
         public static byte[] Get_Block(int index)
         {
             byte[] result = new byte[1024];

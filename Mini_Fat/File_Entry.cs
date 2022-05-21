@@ -164,6 +164,7 @@ namespace Mini_Fat
                     }
                 } while (next != -1);
                 content = Encoding.Default.GetString(B.ToArray());
+                File_size = content.Length;
                 //content = BytesToString(B.ToArray());
                 //byte[] b = new byte[32];
                 //for (int i = 0; i < B.Count; i++)

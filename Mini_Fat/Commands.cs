@@ -78,22 +78,21 @@ namespace Mini_Fat
             }
 
         }
-        public static void MD(string name)
+        public static void Touch(string name)
         {
+            if (name.Length < 11)
+            {
+                for (int i = name.Length; i < 11; i++)
+                {
+                    name += " ";
+                }
 
+            }
             if (Program.current_directory.Search_Directory(name) == -1)
             {
                 if ((name.ToUpper()).Contains("TXT"))
                 {
                     string s = "fatma we are here";
-                    if (name.Length < 11)
-                    {
-                        for (int i = name.Length; i < 11; i++)
-                        {
-                           name += " ";
-                        }
-
-                    }
                     File_Entry o = new File_Entry(name, 0x0, 0, s.Length, s, Program.current_directory);
                     o.WriteFileContent();
                     Program.current_directory.Directory_table.Add(o);
@@ -103,11 +102,31 @@ namespace Mini_Fat
                         Program.current_directory.parent.update_content(Program.current_directory.Get_Directory_Entry());
                         Program.current_directory.parent.Write_Directory();
                     }
-
                 }
                 else
                 {
-                    Directory_Entry d = new Directory_Entry(name, 0x10, 0, 0);
+                    Console.WriteLine(" files should contains .txt extention");
+                }
+            }
+            else
+            {
+                Console.WriteLine(" This File already exists");
+            }
+        }
+        public static void MD(string name)
+        {
+
+            if (name.Length < 11)
+            {
+                for (int i = name.Length; i < 11; i++)
+                {
+                    name += " ";
+                }
+
+            }
+            if (Program.current_directory.Search_Directory(name) == -1)
+            {
+                Directory_Entry d = new Directory_Entry(name, 0x10, 0, 0);
                     Program.current_directory.Directory_table.Add(d);
                     Program.current_directory.Write_Directory();
 
@@ -116,7 +135,6 @@ namespace Mini_Fat
                         Program.current_directory.parent.update_content(Program.current_directory.Get_Directory_Entry());
                         Program.current_directory.parent.Write_Directory();
                     }
-                }
             }
             else
             {
@@ -134,7 +152,6 @@ namespace Mini_Fat
 
             }
             int index=Program.current_directory.Search_Directory(name);
-
             if (index != -1)
             {
                 int fc = Program.current_directory.Directory_table[index].First_cluster;
@@ -143,7 +160,6 @@ namespace Mini_Fat
                 Program.current_directory.Write_Directory();
                 if (Program.current_directory.parent != null)
                 {
-                    Program.current_directory.parent.update_content(Program.current_directory.Get_Directory_Entry());
                     Program.current_directory.parent.Write_Directory();
                 }
             }
@@ -152,16 +168,56 @@ namespace Mini_Fat
                 Console.WriteLine(" This Folder Not exists");
             }
         }
+        public static void DEL(string file_name)
+        {
+            if (file_name.Length < 11)
+            {
+                for (int i = file_name.Length; i < 11; i++)
+                {
+                    file_name += " ";
+                }
+
+            }
+            int index = Program.current_directory.Search_Directory(file_name);
+            if (index != -1)
+            {
+                if (Program.current_directory.Directory_table[index].File_attribut == 0x0)
+                {
+                    int fc = Program.current_directory.Directory_table[index].First_cluster;
+                    int size = Program.current_directory.Directory_table[index].File_size;
+                    File_Entry o = new File_Entry(file_name, 0X0, fc, size, " ", Program.current_directory);
+                    o.WriteFileContent();
+                    o.DeleteFile();
+                    Program.current_directory.Write_Directory();
+                    if (Program.current_directory.parent != null)
+                    {
+                        Program.current_directory.parent.Write_Directory();
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("system can`t find the file specified.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("system can`t find the file specified.");
+            }
+        }
         public static void CD(string name)
         {
+            string path;
             int index = Program.current_directory.Search_Directory(name);
             if (index != -1)
             {
                 int fc = Program.current_directory.Directory_table[index].First_cluster;
                 Directory d = new Directory(name.ToCharArray(), 0x10, fc, Program.current_directory,0);
                 Program.current_directory = d;
-                Program.currentPath += "\\" + Program.current_directory.File_name;
+                Program.currentPath += "\\" +new string( Program.current_directory.File_name);
                 d.Read_Directory();
+                //path = Program.currentPath;
+                //path += "\\" + name.Trim(new char[] { '\0', ' ' });
+                //    Program.currentPath = path;
             }
             else
             {
@@ -215,6 +271,7 @@ namespace Mini_Fat
                         File_Entry o = new File_Entry(name, 0x0, fc, size, content, Program.current_directory);
                         o.WriteFileContent();
                     }
+                  // size = (content.LastIndexOf("  "));
                     Directory_Entry d = new Directory_Entry(name, 0x0, fc, size);
                     Program.current_directory.Directory_table.Add(d);
                     Program.current_directory.Write_Directory();
@@ -307,43 +364,6 @@ namespace Mini_Fat
             else
             {
                 Console.WriteLine("system can`t find the path specified.");
-            }
-        }
-        public static void DEL(string file_name)
-        {
-            if (file_name.Length < 11)
-            {
-                for (int i = file_name.Length; i < 11; i++)
-                {
-                    file_name += " ";
-                }
-
-            }
-            int index = Program.current_directory.Search_Directory(file_name);
-            if (index != -1)
-            {
-                if (Program.current_directory.Directory_table[index].File_attribut == 0x0)
-                {
-                    int fc = Program.current_directory.Directory_table[index].First_cluster;
-                    int size = Program.current_directory.Directory_table[index].File_size;
-                    File_Entry o = new File_Entry(file_name,0X0,fc,size," ",Program.current_directory);
-                    o.WriteFileContent();
-                    o.DeleteFile();
-                    Program.current_directory.Write_Directory();
-                    if (Program.current_directory.parent != null)
-                    {
-                        Program.current_directory.parent.update_content(Program.current_directory.Get_Directory_Entry());
-                        Program.current_directory.parent.Write_Directory();
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("system can`t find the file specified.");
-                }
-            }
-            else
-            {
-                Console.WriteLine("system can`t find the file specified.");
             }
         }
       /*  public static void COPY(string source, string destination)
@@ -458,6 +478,7 @@ namespace Mini_Fat
                             Program.current_directory.parent.Write_Directory();
                         }
                         Program.current_directory=n;
+                        Program.currentPath= new string(Program.current_directory.File_name);
                     }
                     else
                     {
